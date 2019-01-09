@@ -461,7 +461,7 @@ BCSession.prototype.flush = function() {
 };
 
 BCSession.prototype._flush = function() {
-  var a, arrays, bytes, data, id, logData, logMsg, numUnsentArrays, _i, _len;
+  var a, arrays, bytes, contextData, data, i, id, logMsg, numUnsentArrays, previewCharCodes, _i, _j, _len;
   if (!this._backChannel) {
     return;
   }
@@ -480,24 +480,38 @@ BCSession.prototype._flush = function() {
     bytes = JSON.stringify(data) + "\n";
     if (bytes.length > 10 * 1000 * 1000) {
       logMsg = "Large browserchannel response of length " + bytes.length;
-      logData = {
+      contextData = {
         logMsg: logMsg,
         id: this.id,
         address: this.address,
         query: this.query,
         headers: this.headers,
-        options: this.options
+        options: this.options,
+        arraysLength: arrays.length
       };
-      logData.dataPreview = "" + (bytes.slice(0, 200)) + " ... " + (bytes.slice(-200));
-      console.log(JSON.stringify(logData));
+      console.log(JSON.stringify(contextData));
+      previewCharCodes = [];
+      for (i = _i = 0; _i < 250; i = ++_i) {
+        previewCharCodes.push(bytes.charCodeAt(i));
+      }
+      process.stdout.write(Buffer.from(previewCharCodes));
+      console.log();
+      previewCharCodes = [];
+      i = bytes.length - 250;
+      while (i < bytes.length) {
+        previewCharCodes.push(bytes.charCodeAt(i));
+        i++;
+      }
+      process.stdout.write(Buffer.from(previewCharCodes));
+      console.log();
     }
     bytes = bytes.replace(/\u2028/g, "\\u2028");
     bytes = bytes.replace(/\u2029/g, "\\u2029");
     this._backChannel.methods.write(bytes);
     this._backChannel.bytesSent += bytes.length;
     this._lastSentArrayId = this._lastArrayId;
-    for (_i = 0, _len = arrays.length; _i < _len; _i++) {
-      a = arrays[_i];
+    for (_j = 0, _len = arrays.length; _j < _len; _j++) {
+      a = arrays[_j];
       if (a.sendcallback != null) {
         if (typeof a.sendcallback === "function") {
           a.sendcallback();

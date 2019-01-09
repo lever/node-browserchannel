@@ -799,9 +799,26 @@ BCSession::_flush = ->
     # Log out info about responses larger than 10 million chars (~10 MB).
     if bytes.length > 10 * 1000 * 1000
       logMsg = "Large browserchannel response of length #{bytes.length}"
-      logData = {logMsg, @id, @address, @query, @headers, @options}
-      logData.dataPreview = "#{bytes.slice(0, 200)} ... #{bytes.slice(-200)}"
-      console.log(JSON.stringify(logData))
+      contextData = {logMsg, @id, @address, @query, @headers, @options, arraysLength: arrays.length}
+      console.log(JSON.stringify(contextData))
+
+      # String.slice in high memory pressure situations can actually fail in V8, even if we just
+      # want to slice off ~200 characters. So we pull of characters one by one, and write them
+      # out via a buffer.
+
+      previewCharCodes = []
+      for i in [0...250]
+        previewCharCodes.push(bytes.charCodeAt(i))
+      process.stdout.write(Buffer.from(previewCharCodes))
+      console.log()
+
+      previewCharCodes = []
+      i = bytes.length - 250
+      while i < bytes.length
+        previewCharCodes.push(bytes.charCodeAt(i))
+        i++
+      process.stdout.write(Buffer.from(previewCharCodes))
+      console.log()
 
     # Stand back, pro hax! Ideally there is a general solution for escaping these characters
     # when converting to JSON.
