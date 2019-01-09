@@ -796,6 +796,13 @@ BCSession::_flush = ->
     data = ([id, data] for {id, data} in arrays)
     bytes = JSON.stringify(data) + "\n"
 
+    # Log out info about responses larger than 10 million chars (~10 MB).
+    if bytes.length > 10 * 1000 * 1000
+      logMsg = "Large browserchannel response of length #{bytes.length}"
+      logData = {logMsg, @id, @address, @query, @headers, @options}
+      logData.dataPreview = "#{bytes.slice(0, 200)} ... #{bytes.slice(-200)}"
+      console.log(JSON.stringify(logData))
+
     # Stand back, pro hax! Ideally there is a general solution for escaping these characters
     # when converting to JSON.
     bytes = bytes.replace(/\u2028/g, "\\u2028")

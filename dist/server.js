@@ -461,7 +461,7 @@ BCSession.prototype.flush = function() {
 };
 
 BCSession.prototype._flush = function() {
-  var a, arrays, bytes, data, id, numUnsentArrays, _i, _len;
+  var a, arrays, bytes, data, id, logData, logMsg, numUnsentArrays, _i, _len;
   if (!this._backChannel) {
     return;
   }
@@ -478,6 +478,19 @@ BCSession.prototype._flush = function() {
       return _results;
     })();
     bytes = JSON.stringify(data) + "\n";
+    if (bytes.length > 10 * 1000 * 1000) {
+      logMsg = "Large browserchannel response of length " + bytes.length;
+      logData = {
+        logMsg: logMsg,
+        id: this.id,
+        address: this.address,
+        query: this.query,
+        headers: this.headers,
+        options: this.options
+      };
+      logData.dataPreview = "" + (bytes.slice(0, 200)) + " ... " + (bytes.slice(-200));
+      console.log(JSON.stringify(logData));
+    }
     bytes = bytes.replace(/\u2028/g, "\\u2028");
     bytes = bytes.replace(/\u2029/g, "\\u2029");
     this._backChannel.methods.write(bytes);
