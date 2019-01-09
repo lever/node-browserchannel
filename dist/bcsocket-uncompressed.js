@@ -2688,7 +2688,7 @@ $ = function(a, b) {
   g.channelClosed = function(a, c, d) {
     var g;
     if (r.readyState !== $.CLOSED) {
-      return w = null, a = h ? Yd[h] : "Closed", X($.CLOSED), b.reconnect && 7 !== h && 0 !== h && (g = 6 === h ? 0 : K, clearTimeout(v), v = setTimeout(u, g)), e("onclose", 0, a, c, d), h = null;
+      return w.e = null /* session.setHandler(null) */, w = null, a = h ? Yd[h] : "Closed", X($.CLOSED), b.reconnect && 7 !== h && 0 !== h && (g = 6 === h ? 0 : K, clearTimeout(v), v = setTimeout(u, g)), e("onclose", 0, a, c, d), h = null;
     }
   };
   g.channelHandleArray = function(a, b) {
