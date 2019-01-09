@@ -461,7 +461,7 @@ BCSession.prototype.flush = function() {
 };
 
 BCSession.prototype._flush = function() {
-  var a, arrays, bytes, contextData, data, i, id, logMsg, numUnsentArrays, previewCharCodes, _i, _j, _len;
+  var a, arrays, bytes, contextData, data, i, id, logMsg, numUnsentArrays, previewChars, _i, _j, _len;
   if (!this._backChannel) {
     return;
   }
@@ -490,20 +490,20 @@ BCSession.prototype._flush = function() {
         arraysLength: arrays.length
       };
       console.log(JSON.stringify(contextData));
-      previewCharCodes = [];
+      console.log('Preview of start and end of response:');
+      previewChars = [];
       for (i = _i = 0; _i < 250; i = ++_i) {
-        previewCharCodes.push(bytes.charCodeAt(i));
+        previewChars.push(bytes[i]);
       }
-      process.stdout.write(Buffer.from(previewCharCodes));
-      console.log();
-      previewCharCodes = [];
+      console.log(previewChars.join(''));
+      console.log('...');
+      previewChars = [];
       i = bytes.length - 250;
       while (i < bytes.length) {
-        previewCharCodes.push(bytes.charCodeAt(i));
+        previewChars.push(bytes[i]);
         i++;
       }
-      process.stdout.write(Buffer.from(previewCharCodes));
-      console.log();
+      console.log(previewChars.join(''));
     }
     bytes = bytes.replace(/\u2028/g, "\\u2028");
     bytes = bytes.replace(/\u2029/g, "\\u2029");

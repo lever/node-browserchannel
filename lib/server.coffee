@@ -802,23 +802,24 @@ BCSession::_flush = ->
       contextData = {logMsg, @id, @address, @query, @headers, @options, arraysLength: arrays.length}
       console.log(JSON.stringify(contextData))
 
-      # String.slice in high memory pressure situations can actually fail in V8, even if we just
-      # want to slice off ~200 characters. So we pull of characters one by one, and write them
-      # out via a buffer.
-
-      previewCharCodes = []
+      # Log the beginning and end of the data.
+      #
+      # In V8 as of 2019-Jan, string concatenation can result in "cons" strings,
+      # which are strings stored in a tree structure. They get internally flattened
+      # upon calls to certain methods, such as slice() or charCodeAt(). This flattening
+      # can result in a OOM, so to try and avoid this, we use String::Get (`str[index]`).
+      console.log('Preview of start and end of response:')
+      previewChars = []
       for i in [0...250]
-        previewCharCodes.push(bytes.charCodeAt(i))
-      process.stdout.write(Buffer.from(previewCharCodes))
-      console.log()
-
-      previewCharCodes = []
+        previewChars.push(bytes[i])
+      console.log(previewChars.join(''))
+      console.log('...')
+      previewChars = []
       i = bytes.length - 250
       while i < bytes.length
-        previewCharCodes.push(bytes.charCodeAt(i))
+        previewChars.push(bytes[i])
         i++
-      process.stdout.write(Buffer.from(previewCharCodes))
-      console.log()
+      console.log(previewChars.join(''))
 
     # Stand back, pro hax! Ideally there is a general solution for escaping these characters
     # when converting to JSON.
